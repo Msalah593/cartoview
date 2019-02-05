@@ -53,7 +53,6 @@
             ROOT_URLCONF = cartoview_settings.ROOT_URLCONF
 
             APPS_DIR = os.path.abspath(os.path.join(PROJECT_ROOT, "apps"))
-            PENDING_APPS = os.path.join(PROJECT_ROOT, "pendingOperation.yml")
             APPS_MENU = False
             # NOTE: please comment the following line of you want to use geonode templates
             TEMPLATES[0][
@@ -63,15 +62,18 @@
 
             STATICFILES_DIRS += cartoview_settings.CARTOVIEW_STATIC_DIRS
 
-            from cartoview.app_manager.settings import load_apps
+            from cartoview import app_manager
             from past.builtins import execfile
-            CARTOVIEW_APPS, APPS_SETTINGS = load_apps(APPS_DIR)
+            app_manager_settings = os.path.join(
+                os.path.dirname(app_manager.__file__), "settings.py")
+            execfile(os.path.realpath(app_manager_settings))
+            load_apps(APPS_DIR)
             INSTALLED_APPS += CARTOVIEW_APPS
             for settings_file in APPS_SETTINGS:
                 try:
                     execfile(settings_file)
                 except Exception as e:
-                    pass
+                    print(e.message)
           ```
       - **restart your server**
 
