@@ -13,7 +13,7 @@ services:
     networks:
       -cartoview-internal:
   elasticsearch:
-    image: elasticsearch:5.6.12-alpine
+    image: elasticsearch:2.4.1
     restart: unless-stopped
     stdin_open: true
     tty: true
@@ -31,14 +31,13 @@ services:
     networks:
       -cartoview-internal:
   data-dir-conf:
-    image: geonode/geoserver_data:latest
+    image: geonode/geoserver_data:2.12.x
     restart: on-failure
-    container_name: gsconf4cartoview
     command: /bin/true
     volumes:
       - geoserver-data-dir:/geoserver_data/data
   geoserver:
-    image: cartoview/geoserver_docker:tomcat
+    image: cartoview/geoserver_docker:2.12.x
     depends_on:
       - postgis
       - data-dir-conf
@@ -57,7 +56,6 @@ services:
     image: cartoview/cartoview:latest
     command: bash -c "pip install -e . && python manage.py cherry_server"
     restart: unless-stopped
-    hostname: cartoview
     depends_on:
       - postgis
       - geoserver
@@ -72,10 +70,9 @@ services:
     expose:
       - "8000"
   celery:
-    image: cartoview/cartoview:latest
+    image: cartoview/cartoview:1.8.x
     command: bash -c "pip install -e . && celery worker --app=cartoview --broker=amqp://guest:guest@rabbitmq:5672/ -B -E -l debug"
     restart: unless-stopped
-    hostname: celery
     depends_on:
       - postgis
       - rabbitmq
